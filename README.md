@@ -1,7 +1,7 @@
 # workoutcomp-api
 REST api for the workoutcomp project
-
-##Setup
+---
+## Setup
 1. Setup virtual environment.
 `python3 -m venv env`
 
