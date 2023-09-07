@@ -10,20 +10,23 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import dotenv
 from pathlib import Path
+from common.utils import get_env_var
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+dotenv.load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%37clwg&z1a0xnrv+s116j7eh1+_@&+9p(&j0qw0(34veep-^i'
+SECRET_KEY = get_env_var('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_env_var("DEBUG_ENABLE") == 'true'
 
 ALLOWED_HOSTS = []
 
@@ -38,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'workoutcompmain'
 
 ]
@@ -50,6 +54,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'workoutcomp_api.urls'
@@ -123,4 +130,60 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
+CLIENT_ORIGIN_URL = get_env_var('CLIENT_ORIGIN_URL')
+
+CORS_ALLOWED_ORIGINS = [CLIENT_ORIGIN_URL]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST"
+]
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+]
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_SECONDS = 31536000
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+AUTH0_DOMAIN = get_env_var('AUTH0_DOMAIN')
+AUTH0_AUDIENCE = get_env_var('AUTH0_AUDIENCE')
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
+]
+
+# SIMPLE_JWT = {
+#     'ALGORITHM': 'RS256',
+#     'JWK_URL': f'https://{AUTH0_DOMAIN}/.well-known/jwks.json',
+#     'AUDIENCE': AUTH0_AUDIENCE,
+#     'ISSUER': f'https://{AUTH0_DOMAIN}/',
+#     'USER_ID_CLAIM': 'sub',
+#     'AUTH_TOKEN_CLASSES': ('auth.tokens.Auth0Token',),
+# }
+
+JWT_AUTH = {
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER':
+        'workoutcomp_api.utils.jwt_get_username_from_payload_handler',
+    'JWT_DECODE_HANDLER':
+        'workoutcomp_api.utils.jwt_decode_token',
+    'JWT_ALGORITHM': 'RS256',
+    'JWT_AUDIENCE': AUTH0_AUDIENCE,
+    'JWT_ISSUER': f'https://{AUTH0_DOMAIN}/',
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
