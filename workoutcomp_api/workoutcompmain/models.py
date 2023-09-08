@@ -14,6 +14,7 @@ class Competition(models.Model):
     code = models.TextField()
     owner = models.ForeignKey('auth.User', related_name='competitions', on_delete=models.CASCADE)
     users = models.ManyToManyField('auth.User')
+    workouts = models.ManyToManyField('Workout')
 
 class WorkOutCategories(models.IntegerChoices):
     Strength = 1,"Strength"
