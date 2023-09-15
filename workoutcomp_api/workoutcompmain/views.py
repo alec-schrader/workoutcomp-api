@@ -10,22 +10,26 @@ from rest_framework.decorators import action
 from rest_framework import status
 
 class CompetitionViewSet(viewsets.ModelViewSet):
-    """
-    This viewset automatically provides `list`, `create`, `retrieve`,
-    `update` and `destroy` actions.
-    """
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user, users=[self.request.user])
+
+    @action(detail=True, methods=['put'], url_path='addUser/(?P<username>\w+)', url_name='addUser')
+    def addUser(self, request, pk, username):
+        user = get_object_or_404(User, username=username)
+
+        comp = Competition.objects.get(pk=pk)
+
+        comp.users.add(user.id)
+        comp.save()
+
+        data = CompetitionSerializer(comp).data
+        return Response(data, status=status.HTTP_200_OK)
 
 class WorkoutViewSet(viewsets.ModelViewSet):
-    """
-    This viewset automatically provides `list`, `create`, `retrieve`,
-    `update` and `destroy` actions.
-    """
     queryset = Workout.objects.all()
     serializer_class = WorkoutSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
@@ -34,9 +38,6 @@ class WorkoutViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
     
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    This viewset automatically provides `list` and `retrieve` actions.
-    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]

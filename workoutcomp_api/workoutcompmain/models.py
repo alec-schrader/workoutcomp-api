@@ -13,8 +13,7 @@ class Competition(models.Model):
     ruleset = models.IntegerField(choices=RuleSets.choices, default=RuleSets.Standard)
     code = models.TextField()
     owner = models.ForeignKey('auth.User', related_name='competitions', on_delete=models.CASCADE)
-    users = models.ManyToManyField('auth.User')
-    workouts = models.ManyToManyField('Workout')
+    users = models.ManyToManyField('auth.User', blank=True)
 
 class WorkOutCategories(models.IntegerChoices):
     Strength = 1,"Strength"
@@ -25,4 +24,5 @@ class Workout(models.Model):
     category = models.IntegerField(choices=WorkOutCategories.choices)
     date = models.DateField()
     duration = models.IntegerField()
+    intensity = models.IntegerField()
     owner = models.ForeignKey('auth.User', related_name='workouts', on_delete=models.CASCADE)

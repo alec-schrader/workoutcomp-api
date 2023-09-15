@@ -16,11 +16,11 @@ class WorkoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workout
         fields = ['id', 'owner',
-                  'category', 'date', 'duration']
+                  'category', 'date', 'duration', 'intensity']
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):    
-    competitions = serializers.PrimaryKeyRelatedField(many=True, queryset=Competition.objects.all())
-    workouts = serializers.PrimaryKeyRelatedField(many=True, queryset=Workout.objects.all())
+    competitions = CompetitionSerializer(many=True)
+    workouts = WorkoutSerializer(many=True)
 
     class Meta:
         model = User
