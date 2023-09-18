@@ -24,6 +24,21 @@ class CompetitionViewSet(viewsets.ModelViewSet):
         data = CompetitionSerializer(comp, context={'request': request}).data
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(methods=['get'], detail=True,
+        url_path='workouts')
+    def getWorkouts(self, request, pk):
+        comp = Competition.objects.get(pk=pk)
+        print(comp)
+
+        users = []
+        for user in comp.users.all():
+            users.append(user.id)
+
+        workouts = Workout.objects.all().filter(date__lte=comp.enddate).filter(date__gte=comp.startdate).filter(owner__in=users)
+
+        data = WorkoutSerializer(workouts, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['put'], url_path='addUser', url_name='addUser')
     def addUser(self, request, pk):
         print("test")
