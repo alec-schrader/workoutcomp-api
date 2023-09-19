@@ -26,11 +26,6 @@ dotenv.load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = get_env_var('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env_var("DEBUG_ENABLE") == 'true'
-
-host = get_env_var("ALLOWED_HOSTS").split() 
-ALLOWED_HOSTS = host
-
 
 # Application definition
 
@@ -131,9 +126,7 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-CLIENT_ORIGIN_URL = get_env_var('CLIENT_ORIGIN_URL')
-
-CORS_ALLOWED_ORIGINS = [CLIENT_ORIGIN_URL]
+CORS_ALLOWED_ORIGINS = get_env_var('CLIENT_ORIGIN_URL').split("|")
 
 CORS_ALLOW_METHODS = [
     "GET",
@@ -190,7 +183,20 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
 
-SECURE_HSTS_PRELOAD=True
-SECURE_SSL_REDIRECT=get_env_var('SECURE_SSL_REDIRECT')
-SESSION_COOKIE_SECURE=get_env_var('SESSION_COOKIE_SECURE')
-CSRF_COOKIE_SECURE=get_env_var('CSRF_COOKIE_SECURE')
+environment=get_env_var('ENVIRONMENT')
+
+print(environment)
+
+if environment=='prod':
+    hosts = get_env_var("ALLOWED_HOSTS").split("|") 
+    ALLOWED_HOSTS = hosts
+
+    DEBUG = False
+    SECURE_HSTS_PRELOAD=True
+    SECURE_SSL_REDIRECT=True
+    SESSION_COOKIE_SECURE=True
+    CSRF_COOKIE_SECURE=True
+
+if environment=='dev':
+    DEBUG = True
+    ALLOWED_HOSTS = []
