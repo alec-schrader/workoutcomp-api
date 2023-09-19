@@ -12,10 +12,10 @@ python3 -m venv env
 source env/bin/activate
 pip install -r requirements.txt
 
+cd workoutcomp_api
+
 python manage.py makemigrations
 python mangae.py migrate
-
-cd workoutcomp_api
 
 gunicorn --bind 0.0.0.0:8000 workoutcomp_api.wsgi
 

@@ -185,12 +185,13 @@ JWT_AUTH = {
 
 environment=get_env_var('ENVIRONMENT')
 
+
+hosts = get_env_var("ALLOWED_HOSTS").split("|") 
+ALLOWED_HOSTS = hosts
 print(environment)
+print(hosts)
 
 if environment=='prod':
-    hosts = get_env_var("ALLOWED_HOSTS").split("|") 
-    ALLOWED_HOSTS = hosts
-
     DEBUG = False
     SECURE_HSTS_PRELOAD=True
     SECURE_SSL_REDIRECT=True
@@ -199,4 +200,3 @@ if environment=='prod':
 
 if environment=='dev':
     DEBUG = True
-    ALLOWED_HOSTS = []
