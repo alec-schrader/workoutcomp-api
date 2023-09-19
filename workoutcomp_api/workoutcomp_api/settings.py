@@ -28,7 +28,8 @@ SECRET_KEY = get_env_var('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env_var("DEBUG_ENABLE") == 'true'
 
-ALLOWED_HOSTS = []
+host = get_env_var("ALLOWED_HOSTS").split() 
+ALLOWED_HOSTS = host
 
 
 # Application definition
@@ -188,3 +189,8 @@ JWT_AUTH = {
     'JWT_ISSUER': f'https://{AUTH0_DOMAIN}/',
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+SECURE_HSTS_PRELOAD=True
+SECURE_SSL_REDIRECT=get_env_var('SECURE_SSL_REDIRECT')
+SESSION_COOKIE_SECURE=get_env_var('SESSION_COOKIE_SECURE')
+CSRF_COOKIE_SECURE=get_env_var('CSRF_COOKIE_SECURE')
