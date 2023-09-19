@@ -17,10 +17,32 @@ class CompetitionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user, users=[self.request.user])
 
-    @action(detail=True, methods=['put'], url_path='addUser/(?P<username>\w+)', url_name='addUser')
-    def addUser(self, request, pk, username):
-        user = get_object_or_404(User, username=username)
+    @action(methods=['get'], detail=False,
+        url_path='code/(?P<code>\w+)')
+    def getByCode(self, request, code):
+        comp = get_object_or_404(Competition, code=code)
+        data = CompetitionSerializer(comp, context={'request': request}).data
+        return Response(data, status=status.HTTP_200_OK)
 
+    @action(methods=['get'], detail=True,
+        url_path='workouts')
+    def getWorkouts(self, request, pk):
+        comp = Competition.objects.get(pk=pk)
+        print(comp)
+
+        users = []
+        for user in comp.users.all():
+            users.append(user.id)
+
+        workouts = Workout.objects.all().filter(date__lte=comp.enddate).filter(date__gte=comp.startdate).filter(owner__in=users)
+
+        data = WorkoutSerializer(workouts, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['put'], url_path='addUser', url_name='addUser')
+    def addUser(self, request, pk):
+        print("test")
+        user = self.request.user
         comp = Competition.objects.get(pk=pk)
 
         comp.users.add(user.id)
