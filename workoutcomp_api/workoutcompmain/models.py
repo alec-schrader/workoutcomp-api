@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class RuleSets(models.IntegerChoices):
     Standard = 1, "Standard"
@@ -26,3 +27,9 @@ class Workout(models.Model):
     duration = models.IntegerField()
     intensity = models.IntegerField()
     owner = models.ForeignKey('auth.User', related_name='workouts', on_delete=models.CASCADE)
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    username = models.TextField()
+    restingheartrate = models.IntegerField()
+    color = models.TextField()

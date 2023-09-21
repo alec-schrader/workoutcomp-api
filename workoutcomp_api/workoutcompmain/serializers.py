@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from workoutcompmain.models import Competition, Workout
+from workoutcompmain.models import Competition, Workout, Profile
 from django.contrib.auth.models import User
 
 class CompetitionSerializer(serializers.ModelSerializer):
@@ -18,10 +18,19 @@ class WorkoutSerializer(serializers.ModelSerializer):
         fields = ['id', 'owner',
                   'category', 'date', 'duration', 'intensity']
 
+class ProfileSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = Profile
+        fields = ['id', 'user',
+                  'username', 'restingheartrate', 'color']
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):    
     competitions = CompetitionSerializer(many=True)
     workouts = WorkoutSerializer(many=True)
+    profile = ProfileSerializer()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'competitions', 'workouts']
+        fields = ['id', 'username', 'competitions', 'workouts', 'profile']
