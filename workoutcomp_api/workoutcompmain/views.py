@@ -20,7 +20,7 @@ class CompetitionViewSet(mixins.CreateModelMixin,
     @action(methods=['get'], detail=False,
         url_path='code/(?P<code>\w+)')
     def getByCode(self, request, code):
-        comp = get_object_or_404(Competition, code=code)
+        comp = get_object_or_404(Competition, code=code).select_related('users')
         data = CompetitionSerializer(comp, context={'request': request}).data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -28,16 +28,28 @@ class CompetitionViewSet(mixins.CreateModelMixin,
         url_path='workouts')
     def getWorkouts(self, request, pk):
         comp = Competition.objects.get(pk=pk)
-        print(comp)
-
         users = []
         for user in comp.users.all():
             users.append(user.id)
 
-        workouts = Workout.objects.all().filter(date__lte=comp.enddate).filter(date__gte=comp.startdate).filter(owner__in=users)
+        workouts = Workout.objects.all().filter(date__lte=comp.enddate).filter(date__gte=comp.startdate).filter(owner__in=users).order_by('-id')
 
         data = WorkoutSerializer(workouts, many=True).data
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(methods=['get'], detail=True,
+    url_path='users')
+    def getUsers(self, request, pk):
+        comp = Competition.objects.get(pk=pk)
+        userids = []
+        for user in comp.users.all():
+            userids.append(user.id)
+
+        users = User.objects.all().filter(id__in=userids)
+
+        data = UserSerializer(users, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
 
     @action(detail=True, methods=['put'], url_path='addUser', url_name='addUser')
     def addUser(self, request, pk):
@@ -64,6 +76,14 @@ class WorkoutViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    @action(methods=['get'], detail=False, url_path='userid/(?P<userid>\w+)')
+    def getUserWorkout(self, request, userid):
+        user = User.objects.all().get(pk=userid)
+        workouts = Workout.objects.all().filter(owner__exact=user)
+        data = WorkoutSerializer(workouts, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
 
 class UserViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,

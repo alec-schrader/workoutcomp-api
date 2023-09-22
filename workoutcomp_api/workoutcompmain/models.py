@@ -25,6 +25,7 @@ class Workout(models.Model):
     date = models.DateField()
     duration = models.IntegerField()
     intensity = models.IntegerField()
+    note = models.TextField(blank=True, max_length=50)
     owner = models.ForeignKey('auth.User', related_name='workouts', on_delete=models.CASCADE)
 
 class Profile(models.Model):

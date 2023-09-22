@@ -1,13 +1,6 @@
 from rest_framework import serializers
 from workoutcompmain.models import Competition, Workout, Profile
 from django.contrib.auth.models import User
-
-class CompetitionSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Competition
-        fields = ['id', 'users',
-                  'name', 'startdate', 'enddate', 'ruleset', 'code']
         
 class WorkoutSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -15,7 +8,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workout
         fields = ['id', 'owner',
-                  'category', 'date', 'duration', 'intensity']
+                  'category', 'date', 'duration', 'intensity', 'note']
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
@@ -26,13 +19,11 @@ class ProfileSerializer(serializers.ModelSerializer):
                   'username', 'restingheartrate', 'color']
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):    
-    competitions = CompetitionSerializer(many=True, read_only=True)
-    workouts = WorkoutSerializer(many=True, read_only=True)
     profile = ProfileSerializer()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'competitions', 'workouts', 'profile']
+        fields = ['id', 'username', 'profile']
 
     def update(self, instance, validated_data):
         profiledata = validated_data.get('profile', instance.profile)
@@ -43,3 +34,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             instance.profile.restingheartrate = profile.data.get('restingheartrate')
             instance.profile.save()
         return instance
+    
+class CompetitionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Competition
+        fields = ['id', 'users',
+                  'name', 'startdate', 'enddate', 'ruleset', 'code']
