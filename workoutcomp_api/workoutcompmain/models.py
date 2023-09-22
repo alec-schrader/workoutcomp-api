@@ -13,7 +13,6 @@ class Competition(models.Model):
     enddate = models.DateField()
     ruleset = models.IntegerField(choices=RuleSets.choices, default=RuleSets.Standard)
     code = models.TextField(unique=True)
-    owner = models.ForeignKey('auth.User', related_name='competitions', on_delete=models.CASCADE)
     users = models.ManyToManyField('auth.User', blank=True)
 
 class WorkOutCategories(models.IntegerChoices):

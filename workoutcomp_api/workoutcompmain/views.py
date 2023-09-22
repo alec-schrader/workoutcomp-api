@@ -9,13 +9,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 
-class CompetitionViewSet(viewsets.ModelViewSet):
+class CompetitionViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    viewsets.GenericViewSet):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user, users=[self.request.user])
+    permission_classes = [IsAuthenticated]
 
     @action(methods=['get'], detail=False,
         url_path='code/(?P<code>\w+)')
@@ -49,6 +49,12 @@ class CompetitionViewSet(viewsets.ModelViewSet):
         comp.save()
 
         data = CompetitionSerializer(comp).data
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(methods=['get'], detail=False, url_path='userid/(?P<userid>\w+)')
+    def getUserCompetitions(self, request, userid):
+        competitions = Competition.objects.all().filter(users__id__exact=userid)
+        data = CompetitionSerializer(competitions, many=True).data
         return Response(data, status=status.HTTP_200_OK)
 
 class WorkoutViewSet(viewsets.ModelViewSet):
