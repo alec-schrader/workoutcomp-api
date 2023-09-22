@@ -1,9 +1,9 @@
-from workoutcompmain.models import Competition, Workout
-from workoutcompmain.serializers import CompetitionSerializer, WorkoutSerializer, UserSerializer
-from auth.permissions import IsOwnerOrReadOnly, HasAdminPermission
+from workoutcompmain.models import Competition, Workout, Profile
+from workoutcompmain.serializers import CompetitionSerializer, WorkoutSerializer, UserSerializer, ProfileSerializer
+from auth.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
 from rest_framework.permissions import  IsAuthenticated
 from django.contrib.auth.models import User
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -58,11 +58,15 @@ class WorkoutViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-    
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
+
+class UserViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+    queryset = User.objects.all().select_related('profile')
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsUserOrReadOnly]
 
     @action(methods=['get'], detail=False,
             url_path='username/(?P<username>\w+)')
@@ -70,3 +74,4 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         user = get_object_or_404(User, username=username)
         data = UserSerializer(user, context={'request': request}).data
         return Response(data, status=status.HTTP_200_OK)
+    

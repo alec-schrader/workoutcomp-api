@@ -34,3 +34,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'competitions', 'workouts', 'profile']
+
+    def update(self, instance, validated_data):
+        profiledata = validated_data.get('profile', instance.profile)
+        profile = ProfileSerializer(data=profiledata)
+        if profile.is_valid():
+            instance.profile.username = profile.data.get('username')
+            instance.profile.color = profile.data.get('color')
+            instance.profile.restingheartrate = profile.data.get('restingheartrate')
+            instance.profile.save()
+        return instance
