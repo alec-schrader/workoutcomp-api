@@ -23,7 +23,7 @@ class CompetitionViewSet(mixins.CreateModelMixin,
     @action(methods=['get'], detail=False,
         url_path='code/(?P<code>\w+)')
     def getByCode(self, request, code):
-        comp = get_object_or_404(Competition, code=code).select_related('users')
+        comp = get_object_or_404(Competition, code=code)
         data = CompetitionSerializer(comp, context={'request': request}).data
         return Response(data, status=status.HTTP_200_OK)
 
