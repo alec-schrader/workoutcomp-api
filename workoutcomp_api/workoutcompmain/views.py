@@ -17,6 +17,9 @@ class CompetitionViewSet(mixins.CreateModelMixin,
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(users=[self.request.user])
+
     @action(methods=['get'], detail=False,
         url_path='code/(?P<code>\w+)')
     def getByCode(self, request, code):
