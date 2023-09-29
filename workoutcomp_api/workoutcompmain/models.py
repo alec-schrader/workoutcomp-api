@@ -19,6 +19,7 @@ class WorkOutCategories(models.IntegerChoices):
     Strength = 1,"Strength"
     Cardio = 2,"Cardio"
     Wellness = 3,"Wellness Activity"
+    USP = 4,"USP"
 
 class Workout(models.Model):
     category = models.IntegerField(choices=WorkOutCategories.choices)
