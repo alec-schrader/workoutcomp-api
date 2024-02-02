@@ -28,5 +28,10 @@ jobs:
     - name: Run Tests
       env:
         DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        CLIENT_ORIGIN_URL: http://localhost:3000
+        AUTH0_DOMAIN: https://dev-mxnk6f4ep8oxln5o.us.auth0.com
+        AUTH0_AUDIENCE: workoutcomp-api
+        ENVIRONMENT: dev
+        ALLOWED_HOSTS: localhost
       run: |
         python workoutcomp_api/manage.py test
