@@ -1,0 +1,33 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Build Docker image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/workoutcomp-api .
+        docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/workoutcomp-api
+
+    - name: Deploy to Compute Engine
+      run: |
+        gcloud compute ssh workoutcomp-api --zone us-central1-f --command "docker pull us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/workoutcomp-api && docker run -d -p 80:80 us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/workoutcomp-api"
+      env:
+        PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
