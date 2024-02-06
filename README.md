@@ -18,7 +18,7 @@ env/Scripts/activate
 3. Run DB Migrations
 ```
 python manage.py makemigrations
-python mangae.py migrate
+python manage.py migrate
 ```
 
 4. Run the server
