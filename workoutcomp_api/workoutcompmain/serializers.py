@@ -8,7 +8,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workout
         fields = ['id', 'owner',
-                  'category', 'date', 'duration', 'intensity', 'note']
+                  'category', 'activity', 'date', 'duration', 'intensity', 'note']
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
@@ -39,5 +39,11 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Competition
-        fields = ['id', 'users',
+        fields = ['id', 'category',
                   'name', 'startdate', 'enddate', 'ruleset', 'code']
+
+class ActivitySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Activity
+        fields = ['id', 'users', 'name', 'votes']

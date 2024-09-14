@@ -104,3 +104,8 @@ class UserViewSet(mixins.CreateModelMixin,
         data = UserSerializer(user, context={'request': request}).data
         return Response(data, status=status.HTTP_200_OK)
     
+class ActivityViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet)
