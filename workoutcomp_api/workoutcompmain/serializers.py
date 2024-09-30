@@ -1,14 +1,15 @@
 from rest_framework import serializers
-from workoutcompmain.models import Competition, Workout, Profile
+from workoutcompmain.models import Competition, Workout, Profile, Activity, ActivityVote
 from django.contrib.auth.models import User
         
 class WorkoutSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-
+    activityName = serializers.CharField()
     class Meta:
         model = Workout
         fields = ['id', 'owner',
-                  'category', 'activity', 'date', 'duration', 'intensity', 'note']
+                  'category', 'activityName', 'date', 'duration', 'intensity', 'note']
+        read_only_fields = ['activity']
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
@@ -39,11 +40,29 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Competition
-        fields = ['id', 'category',
+        fields = ['id', 'users',
                   'name', 'startdate', 'enddate', 'ruleset', 'code']
 
-class ActivitySerializer(serializers.ModelSerializer):
+class ActivityVoteSerializer(serializers.ModelSerializer):
     
     class Meta:
+        model = ActivityVote
+        fields = ['id', 'approve', 'activity', 'owner']
+
+class ActivitySerializer(serializers.ModelSerializer):
+    approved = serializers.SerializerMethodField('is_approved')
+    
+    def is_approved(self, activity):
+        votes = ActivityVote.objects.filter(activity=activity.id).all()
+        approveCount = 0
+        denyCount = 0
+        for vote in votes:
+            if vote.approve:
+                approveCount = approveCount + 1
+            else:
+                denyCount = approveCount + 1
+        return approveCount >= denyCount
+
+    class Meta:
         model = Activity
-        fields = ['id', 'users', 'name', 'votes']
+        fields = ['id', 'category', 'name', 'approved']

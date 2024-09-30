@@ -1,5 +1,5 @@
-from workoutcompmain.models import Competition, Workout, Profile
-from workoutcompmain.serializers import CompetitionSerializer, WorkoutSerializer, UserSerializer, ProfileSerializer
+from workoutcompmain.models import Competition, Workout, Profile, Activity, ActivityVote
+from workoutcompmain.serializers import CompetitionSerializer, WorkoutSerializer, UserSerializer, ProfileSerializer, ActivitySerializer, ActivityVoteSerializer
 from auth.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
 from rest_framework.permissions import  IsAuthenticated
 from django.contrib.auth.models import User
@@ -56,7 +56,6 @@ class CompetitionViewSet(mixins.CreateModelMixin,
 
     @action(detail=True, methods=['put'], url_path='addUser', url_name='addUser')
     def addUser(self, request, pk):
-        print("test")
         user = self.request.user
         comp = Competition.objects.get(pk=pk)
 
@@ -78,7 +77,9 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        activity, created = Activity.objects.get_or_create(name=self.request.data["activityName"], category=self.request.data["category"])
+        vote, created = ActivityVote.objects.get_or_create(activity=activity, owner=self.request.user, defaults={'approve': True})
+        serializer.save(owner=self.request.user, activity=activity)
 
     @action(methods=['get'], detail=False, url_path='userid/(?P<userid>\w+)')
     def getUserWorkout(self, request, userid):
@@ -86,7 +87,6 @@ class WorkoutViewSet(viewsets.ModelViewSet):
         workouts = Workout.objects.all().filter(owner__exact=user)
         data = WorkoutSerializer(workouts, many=True).data
         return Response(data, status=status.HTTP_200_OK)
-
 
 class UserViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
@@ -108,4 +108,24 @@ class ActivityViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
-                    viewsets.GenericViewSet)
+                    viewsets.GenericViewSet):
+    queryset = Activity.objects.prefetch_related('votes').all()
+    serializer_class = ActivitySerializer
+    permission_classes = [IsAuthenticated]
+
+class ActivityVoteViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+    queryset = ActivityVote.objects.all()#.select_related('votes')
+    serializer_class = ActivityVoteSerializer
+    permission_classes = [IsAuthenticated, IsUserOrReadOnly]
+
+    @action(methods=['get'], detail=False,
+            url_path='activityVotes')
+    def getActivities(self, request):
+        activities = ActivityVote.objects.all().get()
+        data = ActivityVoteSerializer(activities, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+

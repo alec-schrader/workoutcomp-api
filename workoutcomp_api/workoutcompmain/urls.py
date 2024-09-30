@@ -7,6 +7,8 @@ router = DefaultRouter()
 router.register(r'competitions', views.CompetitionViewSet,basename="competition")
 router.register(r'workouts', views.WorkoutViewSet,basename="workout")
 router.register(r'users', views.UserViewSet,basename="user")
+router.register(r'activities', views.ActivityViewSet,basename="activity")
+router.register(r'activitieVotes', views.ActivityVoteViewSet,basename="activityVote")
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

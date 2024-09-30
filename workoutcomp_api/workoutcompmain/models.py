@@ -21,9 +21,14 @@ class WorkOutCategories(models.IntegerChoices):
     Wellness = 3,"Wellness Activity"
     USP = 4,"USP"
 
+class Activity(models.Model):
+    category = models.IntegerField(choices=WorkOutCategories.choices)
+    name = models.TextField(blank=False, max_length=50, unique=True)
+
 class Workout(models.Model):
     category = models.IntegerField(choices=WorkOutCategories.choices)
-    activity = models.TextField(blank=False, max_length=50)
+    activity = models.ForeignKey(Activity, related_name='workouts', on_delete=models.CASCADE)
+    activityName = models.TextField(blank=True, max_length=50)
     date = models.DateField()
     duration = models.IntegerField()
     intensity = models.IntegerField()
@@ -36,14 +41,13 @@ class Profile(models.Model):
     restingheartrate = models.IntegerField(default=0)
     color = models.TextField(blank=True)
 
-class Activity(models.Model):
-    category = models.IntegerField(choices=WorkOutCategories.choices)
-    name = models.TextField(blank=False, max_length=50, unique=True)
-
 class ActivityVote(models.Model):
     approve = models.BooleanField()
     activity = models.ForeignKey(Activity, related_name='votes', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='votes', on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('activity', 'owner')
 
 
 from django.db.models.signals import post_save
