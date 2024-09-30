@@ -26,4 +26,3 @@ python manage.py migrate
 cd workoutcomp_api
 python manage.py runserver
 ```
-
