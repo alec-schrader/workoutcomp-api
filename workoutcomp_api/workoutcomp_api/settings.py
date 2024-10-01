@@ -194,7 +194,7 @@ print(hosts)
 if environment=='prod':
     DEBUG = True
     SECURE_HSTS_PRELOAD=True
-    SECURE_SSL_REDIRECT=True
+    SECURE_SSL_REDIRECT=False
     SESSION_COOKIE_SECURE=True
     CSRF_COOKIE_SECURE=True
 
